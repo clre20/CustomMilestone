@@ -1,0 +1,458 @@
+# ==========================================
+#  CustomMilestone 訊息檔
+#  支援 & 色碼與 &#RRGGBB 十六進位色碼；%變數% 會自動替換
+#  缺少的項目會在啟動與 /cm reload 時自動補齊
+# ==========================================
+
+prefix: "&8[&6成就&8] &r"
+no-permission: "&c你沒有權限這麼做。"
+
+mode:
+  vanilla: "原版成就"
+  fallback: "降級模式"
+
+frame:
+  task: "&a進度"
+  goal: "&b目標"
+  challenge: "&5挑戰"
+
+vanilla:
+  story: "Minecraft（主線）"
+  nether: "地獄"
+  end: "終界"
+  adventure: "冒險"
+  husbandry: "農牧"
+
+# 降級模式（伺服器不支援註冊原版成就時）的達成廣播，格式比照原版
+announce:
+  task: "&f%player% 已達成進度 %title%"
+  goal: "&f%player% 已達成目標 %title%"
+  challenge: "&f%player% 已完成挑戰 %title%"
+  title-task: "&a[%name%&a]"
+  title-goal: "&a[%name%&a]"
+  title-challenge: "&5[%name%&5]"
+  screen-title:
+    task: "&a進度達成！"
+    goal: "&b目標達成！"
+    challenge: "&5挑戰完成！"
+
+reward:
+  to-pending: "&e背包已滿，&f%count% &e份獎勵已存入「待領取獎勵」，輸入 &f/cm &e到選單裡領取。"
+  dropped: "&c待領取獎勵已達上限，&f%count% &c份獎勵掉落在你腳邊！"
+  pending-reminder: "&e你有 &f%count% &e份待領取的成就獎勵，輸入 &f/cm &e領取。"
+  claimed: "&a已領取獎勵。"
+  claimed-all: "&a已領取 &f%count% &a份獎勵。"
+  claimed-some: "&e已領取 &f%count% &e份獎勵，背包空間不足，其餘的請清出空間後再領取。"
+  no-space: "&c背包空間不足，請先清出空間。"
+  broken: "&c這份獎勵的資料已損毀，已從清單移除。"
+
+input:
+  hint: "&7請在聊天室輸入（最多 %max% 字），輸入 &f%keyword% &7取消，&f%seconds% &7秒後逾時。"
+  timeout: "&c輸入逾時，已取消。"
+  cancelled: "&7已取消輸入。"
+  invalid-length: "&c內容不能是空白，且最多 %max% 字，請重新輸入。"
+
+update:
+  current: "&7目前版本：&f%current%"
+  checking: "&7正在檢查 GitHub 上的最新版本..."
+  latest: "&a已是最新版本（%current%）。"
+  outdated: "&e有新版本！目前 &f%current% &e→ 最新 &f%latest%&e，下載：&f%url%"
+  dev: "&b目前版本（%current%）比 GitHub 上的 %latest% 新（開發版）。"
+  no-release: "&7GitHub 上還沒有發布任何版本。"
+  failed: "&c無法檢查更新（連線失敗或達到 GitHub 查詢上限），請稍後再試。"
+  join-notify: "&eCustomMilestone 有新版本 &f%latest%&e（目前 %current%）：&f%url%"
+
+command:
+  unknown: "&c未知的子指令，輸入 &f/%label% help &c查看說明。"
+  player-only: "&c這個指令只能由玩家使用。"
+  data-loading: "&e資料讀取中，請稍後再試。"
+  player-not-found: "&c找不到玩家 &f%player%&c（需要曾經進過伺服器）。"
+  milestone-not-found: "&c找不到成就 &f%id%&c。"
+  bad-number: "&c數字格式錯誤：&f%value%"
+  already-done: "&e%player% 已經完成 %name%&e。"
+  not-done: "&e%player% 尚未完成 %name%&e，也沒有進度。"
+  granted: "&a已給予 %player% 成就 %name%&a。"
+  revoked: "&a已撤銷 %player% 的成就 %name%&a。"
+  progress-set: "&a%player% 的 %name% &a進度：&f%current%/%target%"
+  reset-one: "&a已重置 %player% 的成就 %name%&a。"
+  reset-all: "&a已重置 %player% 的所有成就進度與完成紀錄（待領取獎勵與登入統計保留）。"
+  reloaded: "&a重新載入完成：&f%categories% &a個分類、&f%milestones% &a個成就，顯示模式：&f%mode%"
+  usage:
+    view: "&c用法：/%label% view <玩家>"
+    grant: "&c用法：/%label% grant <玩家> <成就ID>"
+    revoke: "&c用法：/%label% revoke <玩家> <成就ID>"
+    progress: "&c用法：/%label% progress <玩家> <成就ID> <add|set> <數量>"
+    reset: "&c用法：/%label% reset <玩家> [成就ID]"
+  help:
+    - "&6===== CustomMilestone 指令 ====="
+    - "&f/%label% &7- 開啟成就選單"
+    - "&f/%label% top &7- 排行榜"
+    - "&f/%label% view <玩家> &7- 查看其他玩家的成就"
+    - "&f/%label% edit &7- 遊戲內編輯器"
+    - "&f/%label% grant <玩家> <成就> &7- 給予成就"
+    - "&f/%label% revoke <玩家> <成就> &7- 撤銷成就"
+    - "&f/%label% progress <玩家> <成就> <add|set> <數量> &7- 調整進度"
+    - "&f/%label% reset <玩家> [成就] &7- 重置成就資料"
+    - "&f/%label% reload &7- 重新載入設定與成就"
+    - "&f/%label% version &7- 檢查更新"
+
+editor:
+  saved: "&a已儲存。"
+  deleted: "&a已刪除。"
+  warning: "&e注意：%message%"
+  prompt:
+    category-id: "&e請輸入新分類的 ID（小寫英數與底線，1~32 字，也是檔名）："
+    category-name: "&e請輸入分類的顯示名稱（可用 & 色碼）："
+    milestone-id: "&e請輸入新成就的 ID（小寫英數與底線，1~32 字，全部分類不可重複）："
+    name: "&e請輸入新的名稱（可用 & 色碼）："
+    description: "&e請輸入說明，用 &f| &e分行（最多 8 行）："
+    order: "&e請輸入排序數字（越小越前面）："
+    targets: "&e請輸入目標，用逗號分隔（例如 &fdiamond_ore, deepslate_diamond_ore&e；標籤用 &f#minecraft:logs&e；輸入 &fany &e代表不限）："
+    amount: "&e請輸入目標數量（正整數）："
+    requires: "&e請輸入前置成就 ID，用逗號分隔（輸入 &fnone &e清除）："
+    command: "&e請輸入獎勵指令（以後台身分執行，不用加 /，可用 &f%player% %uuid% %milestone%&e）："
+    exp: "&e請輸入獎勵經驗值（0 ~ 1000000）："
+  error:
+    bad-id: "&cID 只能用小寫英數與底線（1~32 字），且不能叫 root，請重新輸入。"
+    category-exists: "&c這個分類 ID 已存在，請重新輸入。"
+    milestone-exists: "&c這個成就 ID 已存在，請重新輸入。"
+    too-many: "&c已達數量上限。"
+    description: "&c說明不能是空白，且最多 8 行，請重新輸入。"
+    number: "&c數字格式錯誤或超出範圍，請重新輸入。"
+    command: "&c指令不能是空白，請重新輸入。"
+    unknown-milestone: "&c找不到其中一個成就 ID（也不能填自己），請重新輸入。"
+    cycle: "&e部分前置成就會造成循環依賴，已自動略過。"
+    empty-hand: "&c請把物品拿在主手上。"
+    item-too-large: "&c這個物品的資料太大（例如裝滿東西的界伏盒），無法設為獎勵。"
+
+gui:
+  common:
+    prev: "&e上一頁"
+    next: "&e下一頁"
+    page-lore:
+      - "&7第 %page% / %pages% 頁"
+    back: "&c返回"
+    close: "&c關閉"
+  main:
+    title: "&8成就"
+    title-other: "&8%player% 的成就"
+    info-name: "&6%player%"
+    info-lore:
+      - "&7自訂成就：&f%completed%&7/&f%total% &7（%percent%%）"
+      - "&7原版成就：&f%vanilla%&7/&f%vanilla_total%"
+      - "&7登入天數：&f%login_days% &7天"
+      - "&7連續登入：&f%streak% &7天"
+    category-name: "&6%name%"
+    category-lore:
+      - ""
+      - "&7完成：&f%completed%&7/&f%total%"
+      - "%bar%"
+      - ""
+      - "&e左鍵查看"
+    vanilla-name: "&a%name% &7（原版）"
+    vanilla-lore:
+      - "&7完成：&f%completed%&7/&f%total%"
+      - "%bar%"
+      - ""
+      - "&e左鍵查看"
+    vanilla-offline-lore:
+      - "&7對方不在線上，無法查看原版成就。"
+    no-category: "&c目前沒有任何成就分類"
+    no-category-lore:
+      - "&7管理員可以用 &f/cm edit &7新增。"
+    leaderboard: "&6排行榜"
+    leaderboard-lore:
+      - "&7看看誰完成的成就最多"
+      - ""
+      - "&e左鍵開啟"
+    pending: "&e待領取獎勵"
+    pending-lore:
+      - "&7目前有 &f%count% &7份"
+      - "&7背包滿時發放的獎勵會存在這裡"
+      - ""
+      - "&e左鍵開啟"
+    editor: "&d編輯器"
+    editor-lore:
+      - "&7新增、修改、刪除成就與分類"
+      - ""
+      - "&e左鍵開啟"
+  category:
+    title: "&8%name% &8- 第 %page% 頁"
+  vanilla:
+    title: "&8%name% &8- 第 %page% 頁"
+    name-done: "&a✔ "
+    name-todo: "&e"
+    lore-done:
+      - "&a✔ 已完成"
+    lore-todo:
+      - "&7尚未完成"
+    lore-progress:
+      - "&7進度：&f%current%&7/&f%target%"
+      - "%bar%"
+  milestone:
+    hidden-name: "&8???"
+    hidden-lore:
+      - "&7隱藏成就，完成後才會顯示。"
+    description-line: "&7%line%"
+    name-done: "&a✔ %name%"
+    name-progress: "&e%name%"
+    name-locked: "&7🔒 %name%"
+    lore-done:
+      - "&a✔ 已完成"
+      - "&7完成時間：&f%time%"
+    lore-progress:
+      - "&7進度：&f%current%&7/&f%target% &7（%percent%%）"
+      - "%bar%"
+    lore-locked:
+      - "&c尚未解鎖"
+      - "&7需要先完成：&f%requires%"
+    reward-title: "&6獎勵："
+    reward-exp: "&7 - &f%exp% &7經驗值"
+    reward-item: "&7 - &f%item% &7x%amount%"
+    reward-commands: "&7 - &f%count% &7項特殊獎勵"
+    frame-line: "&8類型：%frame%"
+  leaderboard:
+    title-custom: "&8排行榜 - 自訂成就"
+    title-vanilla: "&8排行榜 - 含原版成就"
+    entry-name: "&6#%rank% &f%player%"
+    entry-lore:
+      - "&7完成數：&f%value%"
+    empty: "&7目前還沒有人上榜"
+    switch-vanilla: "&a切換：含原版成就"
+    switch-custom: "&a切換：僅自訂成就"
+    switch-lore:
+      - "&e左鍵切換"
+    updated: "&7排名更新時間"
+    updated-lore:
+      - "&f%time%"
+      - "&7每 %minutes% 分鐘更新一次"
+  pending:
+    title: "&8待領取獎勵"
+    item-lore:
+      - ""
+      - "&7取得時間：&f%time%"
+      - "&e左鍵領取"
+    broken: "&c資料損毀的獎勵"
+    empty: "&7沒有待領取的獎勵"
+    claim-all: "&a全部領取"
+    claim-all-lore:
+      - "&7領取所有放得下的獎勵"
+      - ""
+      - "&e左鍵領取"
+  confirm:
+    title: "&8確認"
+    question: "&f%question%"
+    accept: "&a確認"
+    accept-lore:
+      - "&c這個操作無法復原"
+    deny: "&c取消"
+  editor:
+    home-title: "&8編輯器 - 分類"
+    category-title: "&8編輯器 - %name%"
+    milestone-title: "&8編輯成就 - %id%"
+    trigger-title: "&8選擇觸發類型"
+    reward-title: "&8編輯獎勵 - %id%"
+    category-name: "&6%name%"
+    category-lore:
+      - "&7ID：&f%id%"
+      - "&7成就數：&f%count%"
+      - "&7排序：&f%order%"
+      - ""
+      - "&e左鍵編輯"
+    milestone-name: "&e%name%"
+    milestone-lore:
+      - "&7ID：&f%id%"
+      - "&7觸發：&f%trigger%"
+      - "&7目標數量：&f%amount%"
+      - ""
+      - "&e左鍵編輯"
+    milestone-summary:
+      - "&7ID：&f%id%"
+      - "&7分類：&f%category%"
+    new-category: "&a新增分類"
+    new-category-lore:
+      - "&7依序在聊天室輸入 ID 與名稱"
+    new-milestone: "&a新增成就"
+    new-milestone-lore:
+      - "&7在聊天室輸入 ID，建立後直接進入編輯"
+    help: "&b說明"
+    help-lore:
+      - "&7所有操作都用左鍵"
+      - "&7需要輸入文字時，會關閉介面並在聊天室輸入"
+      - "&7修改會立即寫回 milestones/ 資料夾的 YAML"
+      - "&7並只重新註冊有變更的原版成就"
+      - "&7進階條件（交易對象、座標範圍、統計…）"
+      - "&7請直接編輯 YAML 後輸入 &f/cm reload"
+    current:
+      - "&7目前：&f%value%"
+      - ""
+      - "&e左鍵修改"
+    icon-lore:
+      - "&7把物品拿在主手上，左鍵設為圖示"
+    cycle-lore:
+      - "&7目前：&f%value%"
+      - ""
+      - "&e左鍵切換"
+    toggle-lore:
+      - "&7目前：&f%value%"
+      - ""
+      - "&e左鍵切換"
+    value-true: "是"
+    value-false: "否"
+    none: "無"
+    any: "不限"
+    cat-rename: "&e分類名稱"
+    cat-description: "&e分類說明"
+    cat-icon: "&e分類圖示"
+    cat-order: "&e排序"
+    cat-delete: "&c刪除分類"
+    cat-delete-lore:
+      - "&7會連同分類內所有成就一起刪除"
+    cat-delete-question: "刪除分類 %name% &f與其中 %count% 個成就？"
+    m-name: "&e名稱"
+    m-description: "&e說明"
+    m-icon: "&e圖示"
+    m-frame: "&e外框類型"
+    m-hidden: "&e隱藏成就"
+    m-rewards: "&6獎勵"
+    m-rewards-lore:
+      - "&7經驗值：&f%exp%"
+      - "&7物品：&f%items% &7件"
+      - "&7指令：&f%commands% &7條"
+      - ""
+      - "&e左鍵編輯"
+    m-trigger: "&b觸發類型"
+    m-trigger-lore:
+      - "&7目前：&f%value%"
+      - ""
+      - "&e左鍵選擇"
+    m-targets: "&b目標"
+    m-targets-lore:
+      - "&7目前：&f%value%"
+      - "&7（物品、方塊、生物、世界、生物群系或原版成就 ID）"
+      - ""
+      - "&e左鍵修改"
+    m-amount: "&b目標數量"
+    m-requires: "&b前置成就"
+    m-requires-lore:
+      - "&7目前：&f%value%"
+      - "&7需要先完成這些成就才會開始計算進度"
+      - ""
+      - "&e左鍵修改"
+    m-options: "&b進階條件"
+    option-line: "&7%key%：&f%value%"
+    option-none: "&7（未設定）"
+    options-hint:
+      - ""
+      - "&7進階條件請編輯 &fmilestones/%file%"
+      - "&7的 trigger.options，再輸入 &f/cm reload"
+    m-delete: "&c刪除成就"
+    m-delete-lore:
+      - "&7玩家已有的進度紀錄會保留在資料庫"
+    m-delete-question: "刪除成就 %name%&f？"
+    trigger-name: "&b%name%"
+    current-type: "&a✔ 目前使用中"
+    reward-item-lore:
+      - ""
+      - "&c左鍵移除"
+    reward-broken: "&c無法解析的物品"
+    reward-command-name: "&e指令 #%index%"
+    reward-command-lore:
+      - "&f/%command%"
+      - ""
+      - "&c左鍵移除"
+    reward-add-hand: "&a加入手上的物品"
+    reward-add-hand-lore:
+      - "&7完整保留名稱、附魔、所有元件資料"
+    reward-add-command: "&a加入指令"
+    reward-add-command-lore:
+      - "&7以後台身分執行，最多 %max% 條"
+      - "&7可用 %player% %uuid% %milestone%"
+    reward-exp: "&a經驗值"
+
+# 觸發類型的名稱與說明（編輯器顯示用）
+trigger:
+  break-block:
+    name: "破壞方塊"
+    description: ["&7目標：方塊（可用 #標籤）", "&7進階：natural-only（自己放的不算）"]
+  place-block:
+    name: "放置方塊"
+    description: ["&7目標：方塊（可用 #標籤）"]
+  kill-entity:
+    name: "擊殺生物"
+    description: ["&7目標：生物（可用 #標籤）", "&7進階：exclude-spawner（預設排除生怪磚／生怪蛋）"]
+  kill-player:
+    name: "擊殺玩家"
+    description: ["&7不需要目標"]
+  death:
+    name: "死亡"
+    description: ["&7目標：死亡原因（例如 FALL、LAVA）"]
+  craft:
+    name: "合成"
+    description: ["&7目標：合成出的物品"]
+  smelt:
+    name: "熔煉"
+    description: ["&7目標：從熔爐取出的物品"]
+  enchant:
+    name: "附魔"
+    description: ["&7目標：被附魔的物品", "&7進階：enchantments（例如 sharpness:5）"]
+  brew:
+    name: "釀造"
+    description: ["&7目標：potion / splash_potion / lingering_potion", "&7進階：potion-types（例如 strength）"]
+  anvil:
+    name: "使用鐵砧"
+    description: ["&7目標：從鐵砧取出的物品"]
+  fish:
+    name: "釣魚"
+    description: ["&7目標：釣到的物品", "&7進階：item（物品細節）"]
+  breed:
+    name: "繁殖"
+    description: ["&7目標：生物"]
+  tame:
+    name: "馴服"
+    description: ["&7目標：生物"]
+  shear:
+    name: "剪毛"
+    description: ["&7目標：生物"]
+  consume:
+    name: "食用"
+    description: ["&7目標：食物或藥水", "&7進階：item（物品細節）"]
+  trade:
+    name: "村民交易"
+    description: ["&7目標：換到的物品", "&7進階：item、merchants、professions、min-level、costs"]
+  acquire-item:
+    name: "取得物品（認領）"
+    description: ["&7目標：物品", "&7被認領過的物品給別人也不算", "&7進階：sources、item"]
+  level:
+    name: "經驗等級"
+    description: ["&7目標數量：要達到的等級"]
+  playtime:
+    name: "遊玩時間"
+    description: ["&7目標數量：分鐘"]
+  login-days:
+    name: "登入天數"
+    description: ["&7目標數量：天（每天只算一次）"]
+  login-streak:
+    name: "連續登入"
+    description: ["&7目標數量：連續天數"]
+  enter-world:
+    name: "進入世界"
+    description: ["&7目標：世界名稱"]
+  enter-biome:
+    name: "進入生物群系"
+    description: ["&7目標：生物群系（例如 cherry_grove）"]
+  reach-region:
+    name: "到達座標範圍"
+    description: ["&7進階：world、min、max（x,y,z）"]
+  statistic:
+    name: "原版統計"
+    description: ["&7進階：statistic（例如 JUMP、WALK_ONE_CM）", "&7有子項目的統計需要 sub"]
+  advancement:
+    name: "完成原版成就"
+    description: ["&7目標：原版成就 ID（例如 story/mine_diamond）", "&7目標數量：要完成其中幾個"]
+  milestone-count:
+    name: "完成自訂成就數"
+    description: ["&7目標數量：完成幾個自訂成就", "&7進階：category（只算某分類）"]
+  manual:
+    name: "手動（指令）"
+    description: ["&7只能用 /cm progress 或 /cm grant 推進", "&7方便 NPC 或其他插件串接"]

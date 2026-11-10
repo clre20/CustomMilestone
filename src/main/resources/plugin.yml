@@ -1,0 +1,64 @@
+name: CustomMilestone
+description: '${project.description}'
+prefix: CustomMilestone
+version: '${project.version}'
+
+main: clre20.customMilestone.CustomMilestone
+api-version: '26.1.1'
+load: POSTWORLD
+
+authors: [ Clre20 ]
+website: https://github.com/clre20/CustomMilestone
+softdepend: [ PlaceholderAPI, DiscordSRV ]
+
+commands:
+  custommilestone:
+    description: CustomMilestone 自訂成就
+    usage: /<command> [help]
+    aliases: [ cm ]
+
+permissions:
+  custommilestone.use:
+    description: 開啟成就選單
+    default: true
+  custommilestone.help:
+    description: 查看指令說明
+    default: true
+  custommilestone.top:
+    description: 查看排行榜
+    default: true
+  custommilestone.view.others:
+    description: 查看其他玩家的成就
+    default: op
+  custommilestone.admin.edit:
+    description: 使用遊戲內編輯器（可設定以後台身分執行的獎勵指令，請只給信任的管理員）
+    default: op
+  custommilestone.admin.grant:
+    description: 給予或撤銷玩家的成就
+    default: op
+  custommilestone.admin.progress:
+    description: 增加或設定玩家的成就進度
+    default: op
+  custommilestone.admin.reset:
+    description: 重置玩家的成就資料
+    default: op
+  custommilestone.admin.reload:
+    description: 重新載入設定與成就
+    default: op
+  custommilestone.admin.version:
+    description: 檢查更新，並在登入時收到新版本提醒
+    default: op
+  custommilestone.admin:
+    description: 所有管理權限
+    default: op
+    children:
+      custommilestone.use: true
+      custommilestone.help: true
+      custommilestone.top: true
+      custommilestone.view.others: true
+      custommilestone.admin.edit: true
+      custommilestone.admin.grant: true
+      custommilestone.admin.progress: true
+      custommilestone.admin.reset: true
+      custommilestone.admin.reload: true
+      custommilestone.admin.version: true

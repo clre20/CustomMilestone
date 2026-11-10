@@ -1,0 +1,70 @@
+# ==========================================
+#  CustomMilestone 設定檔
+#  缺少的項目會在啟動與 /cm reload 時自動補齊，原有設定值會保留
+#  成就與分類定義放在 milestones/ 資料夾（每個分類一個 .yml）
+# ==========================================
+
+settings:
+  # 計算「登入天數」「連續登入」用的時區
+  timezone: "Asia/Taipei"
+  # 創造模式與旁觀模式的玩家不累積任何進度
+  ignore-creative: true
+
+display:
+  # auto：註冊成真正的原版成就（右上角彈窗、原版聊天室廣播、DiscordSRV 自動同步）
+  #       伺服器不支援時自動改用降級模式
+  # fallback：一律使用降級模式（插件自己廣播聊天室訊息＋標題＋音效）
+  mode: auto
+  fallback:
+    # 降級模式時，達成者畫面中央顯示標題
+    show-title: true
+    # 降級模式時播放的音效（原版音效 ID，留空則不播放）
+    sound: "minecraft:ui.toast.challenge_complete"
+
+storage:
+  # 玩家資料批次寫入 SQLite 的間隔（秒，最少 10）
+  save-interval-seconds: 60
+
+rewards:
+  # 每位玩家「待領取獎勵」的上限；超過時改掉落在玩家腳邊
+  pending-limit: 100
+
+periodic-check:
+  # 遊玩時間、生物群系、座標範圍、原版統計等條件的檢查間隔（秒，最少 10）
+  interval-seconds: 60
+  # 每個 tick 最多檢查幾位玩家（分批處理，避免一次檢查全部人）
+  players-per-tick: 10
+
+leaderboard:
+  # 排行榜重新計算的間隔（分鐘，最少 1）
+  refresh-minutes: 5
+  # 排行榜顯示的名次數（1 ~ 45）
+  size: 10
+
+item-claim:
+  # 「取得物品」成就的認領記號：被認領的物品給別人也不算數
+  enabled: true
+
+anti-abuse:
+  # 自己放置的方塊再破壞不算（只對設定 natural-only: true 的破壞方塊成就生效）
+  # 每個區塊最多記錄幾個玩家放置的方塊，超過時移除最舊的紀錄
+  placed-blocks-per-chunk: 4096
+
+chat-input:
+  # 編輯器聊天室輸入的逾時（秒）
+  timeout-seconds: 60
+  # 輸入這些文字會取消輸入（不分大小寫）
+  cancel-keywords:
+    - "取消"
+    - "cancel"
+
+discordsrv:
+  # 降級模式時，直接把達成訊息送到 DiscordSRV 的主頻道
+  # （原版成就模式下 DiscordSRV 會自己同步，不需要開這個）
+  fallback-sync: true
+
+update-checker:
+  # 啟動時以非同步方式檢查 GitHub 是否有新版本
+  check-on-startup: true
+  # 有新版本時，具備 custommilestone.admin.version 權限的管理員登入 3 秒後收到提醒
+  notify-on-join: true

@@ -1,0 +1,143 @@
+# ==========================================
+#  分類檔案：檔名就是分類 ID（小寫英數與底線）
+#  這個檔案只在第一次啟動時產生，之後不會被覆蓋，可以自由修改或刪除
+#
+#  每個成就的欄位：
+#    name          名稱（可用 & 色碼）
+#    description   說明（每行一個字串）
+#    icon          圖示物品 ID
+#    frame         外框：task（進度）、goal（目標）、challenge（挑戰）
+#    hidden        隱藏成就：完成前顯示為 ???
+#    requires      前置成就 ID 清單（全部完成後才開始計算）
+#    trigger       觸發條件
+#      type        觸發類型（見 README）
+#      targets     目標清單：物品／方塊／生物 ID，可用 #標籤（例如 #minecraft:logs）；不填 = 不限
+#      amount      目標數量
+#      options     進階條件（依類型不同）
+#    rewards       獎勵
+#      exp           經驗值
+#      items         物品（Data Components 寫法，可加「 x數量」）
+#                    例：diamond_sword[enchantments={sharpness:5}] x1
+#      stored-items  遊戲內編輯器把手上物品設為獎勵時自動產生，不需手動編輯
+#      commands      以後台身分執行的指令，可用 %player% %uuid% %milestone%
+# ==========================================
+
+category:
+  name: "&6生存基礎"
+  description:
+    - "從零開始的生存之路"
+  icon: wooden_pickaxe
+  # 原版成就畫面的分頁背景（材質 ID）
+  background: "minecraft:gui/advancements/backgrounds/stone"
+  order: 1
+
+milestones:
+  lumberjack:
+    name: "&a伐木工"
+    description:
+      - "砍下 64 個原木"
+    icon: oak_log
+    frame: task
+    trigger:
+      type: BREAK_BLOCK
+      targets: ["#minecraft:logs"]
+      amount: 64
+      options:
+        # 自己放置的原木再砍掉不算
+        natural-only: true
+    rewards:
+      exp: 50
+      items:
+        - "iron_axe"
+
+  first_diamond:
+    name: "&b閃亮亮"
+    description:
+      - "親手取得 1 顆鑽石"
+      - "別人給的、已被認領過的鑽石不算"
+    icon: diamond
+    frame: goal
+    requires: [lumberjack]
+    trigger:
+      type: ACQUIRE_ITEM
+      targets: [diamond]
+      amount: 1
+      options:
+        # 只算撿起、從箱子拿出、合成、熔煉、釣魚、交易取得（預設全部）
+        sources: [PICKUP, CONTAINER, CRAFT, SMELT]
+    rewards:
+      exp: 100
+      items:
+        - 'diamond_pickaxe[enchantments={efficiency:3,unbreaking:2},custom_name="礦工的驕傲"] x1'
+
+  monster_hunter:
+    name: "&c怪物獵人"
+    description:
+      - "擊殺 50 隻殭屍或骷髏"
+      - "生怪磚生成的不算"
+    icon: iron_sword
+    frame: task
+    trigger:
+      type: KILL_ENTITY
+      targets: [zombie, skeleton]
+      amount: 50
+    rewards:
+      exp: 200
+      commands:
+        - "give %player% golden_apple 3"
+
+  librarian_friend:
+    name: "&d圖書館的常客"
+    description:
+      - "跟大師級圖書管理員交易 10 次"
+    icon: enchanted_book
+    frame: challenge
+    trigger:
+      type: TRADE
+      amount: 10
+      options:
+        merchants: [villager]
+        professions: [librarian]
+        min-level: 5
+    rewards:
+      exp: 500
+
+  mending_book:
+    name: "&5修補的秘密"
+    description:
+      - "從村民換到一本經驗修補附魔書"
+    icon: enchanted_book
+    frame: goal
+    hidden: true
+    trigger:
+      type: TRADE
+      targets: [enchanted_book]
+      amount: 1
+      options:
+        item: "enchanted_book[stored_enchantments={mending:1}]"
+    rewards:
+      exp: 300
+
+  veteran:
+    name: "&e老玩家"
+    description:
+      - "累積遊玩 10 小時"
+    icon: clock
+    frame: goal
+    trigger:
+      type: PLAYTIME
+      amount: 600
+    rewards:
+      exp: 1000
+
+  collector:
+    name: "&6成就收藏家"
+    description:
+      - "完成 5 個自訂成就"
+    icon: nether_star
+    frame: challenge
+    trigger:
+      type: MILESTONE_COUNT
+      amount: 5
+    rewards:
+      exp: 2000

@@ -1,0 +1,88 @@
+category:
+  name: "&3探索者"
+  description:
+    - "走遍這個世界"
+  icon: compass
+  background: "minecraft:gui/advancements/backgrounds/adventure"
+  order: 2
+
+milestones:
+  nether_visitor:
+    name: "&c熱到不行"
+    description:
+      - "進入地獄"
+    icon: netherrack
+    frame: task
+    trigger:
+      type: ENTER_WORLD
+      # 世界資料夾名稱
+      targets: [world_nether]
+      amount: 1
+    rewards:
+      exp: 50
+
+  cherry_blossom:
+    name: "&d櫻花樹下"
+    description:
+      - "走進櫻花林"
+    icon: cherry_sapling
+    frame: task
+    trigger:
+      type: ENTER_BIOME
+      targets: [cherry_grove]
+      amount: 1
+
+  spawn_return:
+    name: "&a回到原點"
+    description:
+      - "到達主世界 (0, 0) 附近"
+    icon: compass
+    frame: task
+    trigger:
+      type: REACH_REGION
+      amount: 1
+      options:
+        world: world
+        min: "-16,-64,-16"
+        max: "16,320,16"
+
+  marathon:
+    name: "&b馬拉松"
+    description:
+      - "步行 42 公里"
+    icon: leather_boots
+    frame: goal
+    trigger:
+      type: STATISTIC
+      # 統計單位是公分：42 公里 = 4,200,000 公分
+      amount: 4200000
+      options:
+        statistic: WALK_ONE_CM
+    rewards:
+      exp: 500
+
+  diamond_miner:
+    name: "&b鑽石礦工"
+    description:
+      - "挖掘 30 個鑽石礦"
+    icon: diamond_ore
+    frame: task
+    trigger:
+      type: STATISTIC
+      amount: 30
+      options:
+        statistic: MINE_BLOCK
+        sub: diamond_ore
+
+  vanilla_explorer:
+    name: "&6原版探險家"
+    description:
+      - "完成原版成就「進入地獄」與「進入終界」"
+    icon: obsidian
+    frame: challenge
+    trigger:
+      type: ADVANCEMENT
+      targets: ["story/enter_the_nether", "story/enter_the_end"]
+      amount: 2
+    rewards:
+      exp: 1000
