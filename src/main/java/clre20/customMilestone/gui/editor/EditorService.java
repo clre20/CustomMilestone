@@ -35,6 +35,14 @@ public final class EditorService {
         pendingSync = org.bukkit.Bukkit.getScheduler().runTaskLater(plugin, () -> {
             pendingSync = null;
             plugin.advancements().sync(registry());
+            int pending = plugin.advancements().pendingRestart();
+            if (pending > 0) {
+                for (org.bukkit.entity.Player p : org.bukkit.Bukkit.getOnlinePlayers()) {
+                    if (p.hasPermission(EditorMenu.PERMISSION)) {
+                        plugin.messages().send(p, "editor.restart-needed", "count", String.valueOf(pending));
+                    }
+                }
+            }
         }, 40L);
     }
 

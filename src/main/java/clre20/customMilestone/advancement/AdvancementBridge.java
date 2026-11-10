@@ -49,6 +49,7 @@ public final class AdvancementBridge {
     private final Map<String, String> hashes = new HashMap<>();
     private final Set<String> silent = new HashSet<>();
     private boolean active;
+    private int pendingRestart;
 
     public AdvancementBridge(CustomMilestone plugin) {
         this.plugin = plugin;
@@ -57,6 +58,11 @@ public final class AdvancementBridge {
 
     public boolean isActive() {
         return active;
+    }
+
+    /** 已變更或刪除、但要重啟伺服器才會更新原版畫面的成就數。 */
+    public int pendingRestart() {
+        return active ? pendingRestart : 0;
     }
 
     // ===== 註冊 =====
@@ -96,78 +102,84 @@ public final class AdvancementBridge {
                 if (a.getKey().getNamespace().equals(NAMESPACE)) existing.put(a.getKey(), a);
             }
 
-            // 3. 需要重新載入：不存在、內容變了、或父節點要重新載入
-            Set<NamespacedKey> reload = new HashSet<>();
+            // 3. 分類：不存在 → 直接載入；內容變了或已刪除 → 嘗試移除
+            //    （Paper 26.1 的 removeAdvancement 只刪 datapack 檔案、不會從記憶體移除，
+            //     這種情況下舊版本會保留到重啟，重啟時一律以最新定義重新註冊）
+            Set<NamespacedKey> changed = new HashSet<>();
             for (Map.Entry<NamespacedKey, String> e : desired.entrySet()) {
                 NamespacedKey key = e.getKey();
-                NamespacedKey parent = parents.get(key);
-                boolean changed = !existing.containsKey(key)
-                        || !hash(e.getValue()).equals(hashes.get(key.toString()))
-                        || (parent != null && reload.contains(parent));
-                if (changed) reload.add(key);
-            }
-            Set<NamespacedKey> remove = new HashSet<>();
-            for (NamespacedKey key : existing.keySet()) {
-                if (!desired.containsKey(key) || reload.contains(key)) remove.add(key);
-            }
-            // 被移除節點的子節點也必須先移除
-            boolean grew = true;
-            while (grew) {
-                grew = false;
-                for (Map.Entry<NamespacedKey, Advancement> e : existing.entrySet()) {
-                    if (remove.contains(e.getKey())) continue;
-                    Advancement parent = e.getValue().getParent();
-                    if (parent != null && remove.contains(parent.getKey())) {
-                        remove.add(e.getKey());
-                        if (desired.containsKey(e.getKey())) reload.add(e.getKey());
-                        grew = true;
-                    }
+                if (existing.containsKey(key) && !hash(e.getValue()).equals(hashes.get(key.toString()))) {
+                    changed.add(key);
                 }
             }
+            Set<NamespacedKey> remove = new HashSet<>(changed);
+            for (NamespacedKey key : existing.keySet()) {
+                if (!desired.containsKey(key)) remove.add(key);
+            }
 
-            if (reload.isEmpty() && remove.isEmpty()) {
+            List<NamespacedKey> toLoad = new ArrayList<>();
+            for (NamespacedKey key : desired.keySet()) {
+                if (!existing.containsKey(key)) toLoad.add(key);
+            }
+            if (toLoad.isEmpty() && remove.isEmpty()) {
+                pendingRestart = 0;
                 active = true;
                 return;
             }
 
-            // 重新載入成就時伺服器會讓線上玩家從硬碟重讀成就進度：先存檔，避免遺失尚未寫入的原版進度
-            if (!Bukkit.getOnlinePlayers().isEmpty()) Bukkit.savePlayers();
-
-            // 4. 先移除（子節點優先）
+            // 4. 移除（子節點優先）；真的從記憶體移除的，才可以立即以新內容載入
             List<NamespacedKey> removeOrder = new ArrayList<>(remove);
-            removeOrder.sort((a, b) -> Integer.compare(depth(existing.get(b)), depth(existing.get(a))));
+            removeOrder.sort((x, y) -> Integer.compare(depth(existing.get(y)), depth(existing.get(x))));
+            int stale = 0;
             for (NamespacedKey key : removeOrder) {
                 Bukkit.getUnsafe().removeAdvancement(key);
-                hashes.remove(key.toString());
+                if (Bukkit.getAdvancement(key) == null) {
+                    hashes.remove(key.toString());
+                    if (desired.containsKey(key)) toLoad.add(key);
+                } else {
+                    stale++;
+                }
+            }
+            pendingRestart = stale;
+
+            // 依父節點在前的順序
+            Set<NamespacedKey> loadSet = new HashSet<>(toLoad);
+            List<NamespacedKey> loadOrder = new ArrayList<>();
+            for (NamespacedKey key : desired.keySet()) if (loadSet.contains(key)) loadOrder.add(key);
+
+            if (!loadOrder.isEmpty() && !Bukkit.getOnlinePlayers().isEmpty()) {
+                // 載入成就時伺服器會讓線上玩家從硬碟重讀成就進度：先存檔，避免遺失尚未寫入的原版進度
+                Bukkit.savePlayers();
             }
 
-            // 5. 依父節點在前的順序載入
+            // 5. 載入
             int loaded = 0;
             int failed = 0;
             Throwable lastError = null;
-            for (Map.Entry<NamespacedKey, String> e : desired.entrySet()) {
-                if (!reload.contains(e.getKey())) continue;
+            for (NamespacedKey key : loadOrder) {
+                String json = desired.get(key);
                 try {
-                    Advancement adv = Bukkit.getUnsafe().loadAdvancement(e.getKey(), e.getValue());
+                    Advancement adv = Bukkit.getUnsafe().loadAdvancement(key, json);
                     if (adv == null) throw new IllegalStateException("loadAdvancement 回傳 null");
-                    hashes.put(e.getKey().toString(), hash(e.getValue()));
+                    hashes.put(key.toString(), hash(json));
                     loaded++;
                 } catch (UnsupportedOperationException | LinkageError ex) {
                     throw ex; // 伺服器不支援，整體改用降級模式
                 } catch (Exception ex) {
-                    // 單一成就的定義有問題（例如背景 ID 錯誤）：略過它，不影響其他成就
+                    // 單一成就的定義有問題：略過它，不影響其他成就
                     failed++;
                     lastError = ex;
-                    plugin.getLogger().warning("無法註冊原版成就 " + e.getKey() + "：" + ex.getMessage());
+                    plugin.getLogger().warning("無法註冊原版成就 " + key + "：" + ex.getMessage());
                 }
             }
             saveCache();
-            if (loaded == 0 && failed > 0) {
+            if (loaded == 0 && failed > 0 && existing.isEmpty()) {
                 throw new IllegalStateException("所有成就都註冊失敗", lastError);
             }
             active = true;
-            resyncOnline();
-            plugin.getLogger().info("原版成就同步完成：載入 " + loaded + " 個、移除 " + (remove.size() - countIn(remove, reload)) + " 個。");
+            if (loaded > 0) resyncOnline();
+            plugin.getLogger().info("原版成就同步完成：載入 " + loaded + " 個"
+                    + (stale > 0 ? "，" + stale + " 個已變更或刪除的成就會在伺服器重啟後更新原版畫面" : "") + "。");
         } catch (Throwable t) {
             active = false;
             plugin.getLogger().log(Level.WARNING, "無法註冊原版成就，改用降級模式（聊天室廣播＋標題）。原因：" + t, t);
@@ -189,12 +201,6 @@ public final class AdvancementBridge {
             clre20.customMilestone.data.PlayerData d = plugin.data().get(p.getUniqueId());
             if (d != null) plugin.progress().syncAdvancements(p, d);
         }
-    }
-
-    private static int countIn(Set<NamespacedKey> a, Set<NamespacedKey> b) {
-        int n = 0;
-        for (NamespacedKey k : a) if (b.contains(k)) n++;
-        return n;
     }
 
     private static int depth(Advancement a) {

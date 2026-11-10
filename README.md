@@ -29,6 +29,7 @@
 - **遊戲內編輯器**：
   - 新增、修改、刪除分類與成就；名稱、說明、圖示、外框、隱藏、觸發類型、目標、數量、前置、獎勵。
   - 文字用聊天室輸入，有逾時、取消關鍵字、長度與格式驗證。修改立即寫回 YAML。
+  - 新增的成就立即出現在原版成就畫面；修改或刪除已註冊的成就時，箱子選單與進度判斷立即更新，原版成就畫面（按 L）與達成彈窗的文字在伺服器重啟後更新（Paper 26.1 無法在執行中移除已註冊的成就）。
 - **效能**：
   - 高頻事件在最外層先檢查「有沒有成就用到這個類型」。
   - 不監聽玩家移動；生物群系、座標、統計等用低頻定時檢查並分批處理。
@@ -197,7 +198,7 @@ Create custom advancements on Paper 26.x and later. Custom milestones are regist
   - Vanilla toast, vanilla chat announcement (respects `announceAdvancements`), vanilla advancement tab.
   - DiscordSRV picks them up automatically.
   - Falls back to a plugin-side announcement (chat, title, sound, DiscordSRV) if the server cannot register advancements.
-  - Only changed advancements are re-registered.
+  - New milestones appear immediately; edits to already-registered ones update menus and logic at once and the vanilla screen after a restart (Paper 26.1 cannot unregister advancements at runtime).
 - **28 trigger types** with item/block/entity IDs and tags, plus prerequisites.
 - **Villager trade filters**: result item and item details, cost items, villager or wandering trader, profession, minimum level.
 - **Item acquisition with claim marks**: counted items get a hidden claim mark, so the same item does not count for anyone else or twice; only the counted items are marked.

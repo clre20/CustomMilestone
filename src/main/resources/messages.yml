@@ -100,6 +100,7 @@ editor:
   saved: "&a已儲存。"
   deleted: "&a已刪除。"
   warning: "&e注意：%message%"
+  restart-needed: "&e有 %count% 個成就的內容已變更或刪除：箱子選單與進度判斷已立即更新，原版成就畫面（按 L）與達成彈窗的文字會在伺服器重啟後更新。"
   prompt:
     category-id: "&e請輸入新分類的 ID（小寫英數與底線，1~32 字，也是檔名）："
     category-name: "&e請輸入分類的顯示名稱（可用 & 色碼）："

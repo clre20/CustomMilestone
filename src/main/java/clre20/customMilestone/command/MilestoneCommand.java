@@ -86,6 +86,10 @@ public final class MilestoneCommand implements TabExecutor {
                         "categories", String.valueOf(plugin.registry().categories().size()),
                         "milestones", String.valueOf(plugin.registry().size()),
                         "mode", plugin.messages().raw(plugin.advancements().isActive() ? "mode.vanilla" : "mode.fallback"));
+                int pending = plugin.advancements().pendingRestart();
+                if (pending > 0) {
+                    plugin.messages().send(sender, "editor.restart-needed", "count", String.valueOf(pending));
+                }
             }
             case "version" -> {
                 plugin.messages().send(sender, "update.current", "current", plugin.updates().current());
