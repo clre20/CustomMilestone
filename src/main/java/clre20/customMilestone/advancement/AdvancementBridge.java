@@ -138,6 +138,13 @@ public final class AdvancementBridge {
                     if (desired.containsKey(key)) toLoad.add(key);
                 } else {
                     stale++;
+                    // 記憶體裡移不掉（removeAdvancement 只刪了 datapack 檔案）：
+                    // 仍需要的成就把新內容寫回檔案，避免重啟時子成就找不到父節點；下次啟動就是新內容
+                    String json = desired.get(key);
+                    if (json != null) {
+                        writeDatapackFile(key, json);
+                        hashes.put(key.toString(), hash(json));
+                    }
                 }
             }
             pendingRestart = stale;
@@ -178,6 +185,17 @@ public final class AdvancementBridge {
             }
             active = true;
             if (loaded > 0) resyncOnline();
+            // 啟動時父節點才補載入、但子節點早已存在：子節點這次不會顯示在原版畫面，檔案已修正，需要再重啟一次
+            int orphaned = 0;
+            for (Map.Entry<NamespacedKey, NamespacedKey> e : parents.entrySet()) {
+                if (loadSet.contains(e.getValue()) && existing.containsKey(e.getKey()) && !loadSet.contains(e.getKey())) {
+                    orphaned++;
+                }
+            }
+            if (orphaned > 0) {
+                pendingRestart += orphaned;
+                plugin.getLogger().warning(orphaned + " 個成就的父節點這次才補註冊，原版畫面要再重啟一次才會正確顯示（資料與進度不受影響）。");
+            }
             plugin.getLogger().info("原版成就同步完成：載入 " + loaded + " 個"
                     + (stale > 0 ? "，" + stale + " 個已變更或刪除的成就會在伺服器重啟後更新原版畫面" : "") + "。");
         } catch (Throwable t) {
@@ -280,6 +298,38 @@ public final class AdvancementBridge {
         } catch (NoSuchAlgorithmException e) {
             return Integer.toHexString(s.hashCode());
         }
+    }
+
+    /**
+     * 寫入 bukkit datapack 中這個成就的檔案（與 loadAdvancement 使用的位置相同）。
+     * 26.3 起是 advancement/（啟動時會載入），26.1 是 advancements/（啟動時不載入）。
+     */
+    private void writeDatapackFile(NamespacedKey key, String json) {
+        if (Bukkit.getWorlds().isEmpty()) return;
+        // 26.x 的主世界資料夾是 world/dimensions/minecraft/overworld，datapacks 在存檔根目錄（有 level.dat 的那層）
+        File root = Bukkit.getWorlds().getFirst().getWorldFolder();
+        for (File f = root; f != null && !f.equals(Bukkit.getWorldContainer().getAbsoluteFile().getParentFile()); f = f.getParentFile()) {
+            if (new File(f, "level.dat").isFile()) {
+                root = f;
+                break;
+            }
+        }
+        File base = new File(root,
+                "datapacks" + File.separator + "bukkit" + File.separator + "data" + File.separator + key.getNamespace());
+        File singular = new File(base, "advancement");
+        File plural = new File(base, "advancements");
+        File dir = singular.isDirectory() || !plural.isDirectory() ? singular : plural;
+        // 鍵只會是「分類/成就ID」（已用正規表示式限制為小寫英數與底線），不會跳出資料夾
+        if (!key.getKey().matches("^[a-z0-9_]+/[a-z0-9_]+$")) return;
+        File file = new File(dir, key.getKey() + ".json");
+        plugin.database().executor().execute(() -> {
+            try {
+                java.nio.file.Files.createDirectories(file.getParentFile().toPath());
+                java.nio.file.Files.writeString(file.toPath(), json, StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                plugin.getLogger().log(Level.WARNING, "無法寫入成就檔案 " + file, e);
+            }
+        });
     }
 
     private void loadCache() {
