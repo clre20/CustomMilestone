@@ -4,7 +4,7 @@
 #  缺少的項目會在啟動與 /cm reload 時自動補齊
 # ==========================================
 
-prefix: "&8[&6成就&8] &r"
+prefix: "&8[&6CustomMilestone&8] &r"
 no-permission: "&c你沒有權限這麼做。"
 
 mode:
