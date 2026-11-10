@@ -28,6 +28,9 @@
   - 全部左鍵操作；所有介面都有插件簽署（`InventoryHolder` 與按鈕 PDC 標籤 `custommilestone:gui`）。
 - **遊戲內編輯器**：
   - 新增、修改、刪除分類與成就；名稱、說明、圖示、外框、隱藏、觸發類型、目標、數量、前置、獎勵。
+  - 目標、數量的說明與進階條件按鈕會依觸發類型自動切換（例如「原版統計」顯示統計項目與子項目、「到達座標範圍」可直接設為自己站的位置）。
+  - 獎勵物品：左鍵點下方背包的任何物品即可加入，相同物品自動合併；每項物品可調整數量（1 ~ 6400）。
+  - 目標是物品／方塊的觸發，也可以直接點下方背包的物品加入目標。
   - 文字用聊天室輸入，有逾時、取消關鍵字、長度與格式驗證。修改立即寫回 YAML。
   - 新增的成就立即出現在原版成就畫面；修改或刪除已註冊的成就時，箱子選單與進度判斷立即更新，原版成就畫面（按 L）與達成彈窗的文字在伺服器重啟後更新（Paper 26.1 無法在執行中移除已註冊的成就）。
 - **效能**：
@@ -49,6 +52,7 @@
 | `/cm revoke <玩家> <成就>` | 撤銷成就 | 玩家／後台 | `custommilestone.admin.grant` | OP |
 | `/cm progress <玩家> <成就> <add\|set> <數量>` | 調整進度 | 玩家／後台 | `custommilestone.admin.progress` | OP |
 | `/cm reset <玩家> [成就]` | 重置成就資料 | 玩家／後台 | `custommilestone.admin.reset` | OP |
+| `/cm debug` | 除錯模式：即時顯示觸發事件、進度變化與不計入的原因 | 玩家 | `custommilestone.admin.debug` | OP |
 | `/cm reload` | 重新載入設定與成就 | 玩家／後台 | `custommilestone.admin.reload` | OP |
 | `/cm version` | 檢查更新 | 玩家／後台 | `custommilestone.admin.version` | OP |
 | — | 全部管理權限 | — | `custommilestone.admin` | OP |
@@ -65,7 +69,8 @@
 1. 輸入 `/cm edit`，左鍵「新增分類」，依序在聊天室輸入分類 ID 與名稱。
 2. 進入分類後左鍵「新增成就」，輸入成就 ID。
 3. 在成就編輯畫面設定名稱、說明、觸發類型、目標與數量。
-4. 進入「獎勵」，把物品拿在手上左鍵「加入手上的物品」，或加入指令、經驗值。
+4. 進入「獎勵」，左鍵點下方背包的物品加入（相同物品會合併），點上方的獎勵物品可調整數量；也可加入指令、經驗值。
+5. 輸入 `/cm debug` 後實際去做一次，聊天室會顯示是否計入，以及沒計入的原因（條件不符、前置未完成、創造模式）。
 
 ```bash
 /cm edit
@@ -154,7 +159,7 @@ milestones:
 | `MILESTONE_COUNT` | 完成自訂成就數 | | `category` |
 | `MANUAL` | 只能用指令推進 | | |
 
-> 目標不填代表不限。創造與旁觀模式預設不累積進度。用 `/give` 拿到的物品不會計入「取得物品」。
+> 目標不填代表不限（擊殺生物不限目標時不含盔甲座）。原版統計與遊玩時間會包含裝插件之前的累積數值。創造與旁觀模式預設不累積進度。用 `/give` 拿到的物品不會計入「取得物品」。
 
 ## 設定檔
 
@@ -222,6 +227,7 @@ Create custom advancements on Paper 26.x and later. Custom milestones are regist
 | `/cm progress <player> <id> <add\|set> <n>` | Change progress | Player / Console | `custommilestone.admin.progress` | OP |
 | `/cm reset <player> [id]` | Reset | Player / Console | `custommilestone.admin.reset` | OP |
 | `/cm reload` | Reload | Player / Console | `custommilestone.admin.reload` | OP |
+| `/cm debug` | Show trigger events and progress changes live | Player | `custommilestone.admin.debug` | OP |
 | `/cm version` | Check for updates | Player / Console | `custommilestone.admin.version` | OP |
 
 > Main command `/custommilestone`, alias `/cm`. `custommilestone.admin.edit` can set console reward commands; give it only to trusted staff.

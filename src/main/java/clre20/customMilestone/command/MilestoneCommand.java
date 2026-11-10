@@ -39,6 +39,7 @@ public final class MilestoneCommand implements TabExecutor {
             new Sub("revoke", "custommilestone.admin.grant"),
             new Sub("progress", "custommilestone.admin.progress"),
             new Sub("reset", "custommilestone.admin.reset"),
+            new Sub("debug", "custommilestone.admin.debug"),
             new Sub("reload", "custommilestone.admin.reload"),
             new Sub("version", "custommilestone.admin.version"));
 
@@ -80,6 +81,14 @@ public final class MilestoneCommand implements TabExecutor {
             case "revoke" -> grant(sender, args, label, false);
             case "progress" -> progress(sender, args, label);
             case "reset" -> reset(sender, args, label);
+            case "debug" -> {
+                if (sender instanceof Player p) {
+                    boolean on = plugin.progress().toggleDebug(p.getUniqueId());
+                    plugin.messages().send(p, on ? "debug.enabled" : "debug.disabled");
+                } else {
+                    plugin.messages().send(sender, "command.player-only");
+                }
+            }
             case "reload" -> {
                 plugin.reload();
                 plugin.messages().send(sender, "command.reloaded",

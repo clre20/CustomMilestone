@@ -93,6 +93,7 @@ command:
     - "&f/%label% revoke <玩家> <成就> &7- 撤銷成就"
     - "&f/%label% progress <玩家> <成就> <add|set> <數量> &7- 調整進度"
     - "&f/%label% reset <玩家> [成就] &7- 重置成就資料"
+    - "&f/%label% debug &7- 除錯模式：即時顯示觸發與進度"
     - "&f/%label% reload &7- 重新載入設定與成就"
     - "&f/%label% version &7- 檢查更新"
 
@@ -100,6 +101,11 @@ editor:
   saved: "&a已儲存。"
   deleted: "&a已刪除。"
   warning: "&e注意：%message%"
+  option-invalid: "&c條件無效：%message%"
+  pick-item: "&a請左鍵點下方背包中的物品，作為物品條件。"
+  pick-not-material: "&e這個觸發類型的目標不是物品，請用聊天室輸入。"
+  target-added: "&a已加入目標：&f%target%"
+  target-removed: "&e已移出目標：&f%target%"
   restart-needed: "&e有 %count% 個成就的內容已變更或刪除：箱子選單與進度判斷已立即更新，原版成就畫面（按 L）與達成彈窗的文字會在伺服器重啟後更新。"
   prompt:
     category-id: "&e請輸入新分類的 ID（小寫英數與底線，1~32 字，也是檔名）："
@@ -108,11 +114,12 @@ editor:
     name: "&e請輸入新的名稱（可用 & 色碼）："
     description: "&e請輸入說明，用 &f| &e分行（最多 8 行）："
     order: "&e請輸入排序數字（越小越前面）："
-    targets: "&e請輸入目標，用逗號分隔（例如 &fdiamond_ore, deepslate_diamond_ore&e；標籤用 &f#minecraft:logs&e；輸入 &fany &e代表不限）："
+    targets: "&e請輸入目標，用逗號分隔（例如 &fdiamond_ore, zombie, world_nether&e；標籤用 &f#minecraft:logs&e；輸入 &fany &e代表不限）："
     amount: "&e請輸入目標數量（正整數）："
     requires: "&e請輸入前置成就 ID，用逗號分隔（輸入 &fnone &e清除）："
     command: "&e請輸入獎勵指令（以後台身分執行，不用加 /，可用 &f%player% %uuid% %milestone%&e）："
     exp: "&e請輸入獎勵經驗值（0 ~ 1000000）："
+    reward-amount: "&e請輸入數量（1 ~ %max%）："
   error:
     bad-id: "&cID 只能用小寫英數與底線（1~32 字），且不能叫 root，請重新輸入。"
     category-exists: "&c這個分類 ID 已存在，請重新輸入。"
@@ -125,6 +132,14 @@ editor:
     cycle: "&e部分前置成就會造成循環依賴，已自動略過。"
     empty-hand: "&c請把物品拿在主手上。"
     item-too-large: "&c這個物品的資料太大（例如裝滿東西的界伏盒），無法設為獎勵。"
+
+debug:
+  enabled: "&a除錯模式已開啟：你觸發的成就事件會即時顯示在聊天室。再輸入一次關閉。"
+  disabled: "&7除錯模式已關閉。"
+  gamemode: "&8[除錯] &7%type%：&c創造／旁觀模式不計入"
+  locked: "&8[除錯] &7%type% → &f%name% &8(%id%)&7：&c前置成就未完成"
+  no-match: "&8[除錯] &7%type% → &f%name% &8(%id%)&7：&e條件不符"
+  progress: "&8[除錯] &7%type% → &f%name% &8(%id%)&7：&f%before% → &a%after%&7/%target%"
 
 gui:
   common:
@@ -327,12 +342,6 @@ gui:
       - "&7目前：&f%value%"
       - ""
       - "&e左鍵選擇"
-    m-targets: "&b目標"
-    m-targets-lore:
-      - "&7目前：&f%value%"
-      - "&7（物品、方塊、生物、世界、生物群系或原版成就 ID）"
-      - ""
-      - "&e左鍵修改"
     m-amount: "&b目標數量"
     m-requires: "&b前置成就"
     m-requires-lore:
@@ -340,13 +349,78 @@ gui:
       - "&7需要先完成這些成就才會開始計算進度"
       - ""
       - "&e左鍵修改"
-    m-options: "&b進階條件"
-    option-line: "&7%key%：&f%value%"
-    option-none: "&7（未設定）"
-    options-hint:
+    m-amount-lore:
+      - "&7目前：&f%value% &7%unit%"
       - ""
-      - "&7進階條件請編輯 &fmilestones/%file%"
-      - "&7的 trigger.options，再輸入 &f/cm reload"
+      - "&e左鍵修改"
+    trigger-info: "&b觸發說明"
+    trigger-info-head: "&f%name%"
+    target-kind:
+      material:
+        name: "&b目標物品／方塊"
+        lore:
+          - "&7目前：&f%value%"
+          - "&7可用 #標籤，例如 &f#minecraft:logs"
+          - ""
+          - "&e左鍵：在聊天室輸入"
+          - "&e或直接左鍵點下方背包的物品加入／移除"
+      entity:
+        name: "&b目標生物"
+        lore:
+          - "&7目前：&f%value%"
+          - "&7例如 &fzombie, skeleton&7；可用 #標籤"
+          - ""
+          - "&e左鍵：在聊天室輸入"
+      damage_cause:
+        name: "&b死亡原因"
+        lore:
+          - "&7目前：&f%value%"
+          - "&7例如 &fFALL&7（摔死）、&fLAVA&7（岩漿）、&fDROWNING&7（溺水）"
+          - ""
+          - "&e左鍵：在聊天室輸入"
+      world:
+        name: "&b目標世界"
+        lore:
+          - "&7目前：&f%value%"
+          - "&7世界資料夾名稱，例如 &fworld_nether"
+          - ""
+          - "&e左鍵：在聊天室輸入"
+      biome:
+        name: "&b目標生物群系"
+        lore:
+          - "&7目前：&f%value%"
+          - "&7例如 &fcherry_grove, desert"
+          - ""
+          - "&e左鍵：在聊天室輸入"
+      advancement:
+        name: "&b目標原版成就"
+        lore:
+          - "&7目前：&f%value%"
+          - "&7例如 &fstory/mine_diamond"
+          - "&7目標數量＝要完成其中幾個"
+          - ""
+          - "&e左鍵：在聊天室輸入"
+    option-name: "&d%name%"
+    option-value: "&7目前：&f%value%"
+    option-none-title: "&7這個觸發類型沒有進階條件"
+    option-none-lore:
+      - "&7設定目標與數量就可以了"
+    option-action:
+      cycle:
+        - "&e左鍵切換"
+      chat:
+        - "&e左鍵：在聊天室輸入（輸入 none 清除）"
+      item:
+        - "&e左鍵後，再點下方背包的物品設定"
+      picking:
+        - "&a請點下方背包的物品（再按一次取消）"
+      clear:
+        - "&c左鍵清除"
+      position:
+        - "&e左鍵設為你目前站的位置"
+        - "&7（同時把世界設為你目前所在的世界）"
+      world:
+        - "&e左鍵設為你目前所在的世界"
     m-delete: "&c刪除成就"
     m-delete-lore:
       - "&7玩家已有的進度紀錄會保留在資料庫"
@@ -355,16 +429,29 @@ gui:
     current-type: "&a✔ 目前使用中"
     reward-item-lore:
       - ""
-      - "&c左鍵移除"
+      - "&7獎勵數量：&f%amount%"
+      - "&e左鍵調整數量或移除"
     reward-broken: "&c無法解析的物品"
     reward-command-name: "&e指令 #%index%"
     reward-command-lore:
       - "&f/%command%"
       - ""
       - "&c左鍵移除"
-    reward-add-hand: "&a加入手上的物品"
-    reward-add-hand-lore:
-      - "&7完整保留名稱、附魔、所有元件資料"
+    reward-add-inventory: "&a加入物品：點下方背包"
+    reward-add-inventory-lore:
+      - "&7左鍵點下方背包的任何物品即可加入"
+      - "&7數量取自那一疊，完整保留名稱、附魔、所有元件資料"
+      - "&7相同的物品會自動合併數量"
+      - "&7目前 &f%count%&7/&f%max% &7種"
+    reward-item-title: "&8獎勵物品 - %id%"
+    reward-amount-lore:
+      - ""
+      - "&7數量：&f%amount% &7（1 ~ %max%，超過堆疊上限會分成多疊發放）"
+      - "&e左鍵在聊天室輸入數量"
+    reward-step: "&f%step%"
+    reward-remove: "&c移除這個獎勵"
+    reward-remove-lore:
+      - "&7從獎勵中移除"
     reward-add-command: "&a加入指令"
     reward-add-command-lore:
       - "&7以後台身分執行，最多 %max% 條"
@@ -374,86 +461,173 @@ gui:
 # 觸發類型的名稱與說明（編輯器顯示用）
 trigger:
   break-block:
+    amount: "個"
     name: "破壞方塊"
     description: ["&7目標：方塊（可用 #標籤）", "&7進階：natural-only（自己放的不算）"]
   place-block:
+    amount: "個"
     name: "放置方塊"
     description: ["&7目標：方塊（可用 #標籤）"]
   kill-entity:
+    amount: "隻"
     name: "擊殺生物"
     description: ["&7目標：生物（可用 #標籤）", "&7進階：exclude-spawner（預設排除生怪磚／生怪蛋）"]
   kill-player:
+    amount: "次"
     name: "擊殺玩家"
     description: ["&7不需要目標"]
   death:
+    amount: "次"
     name: "死亡"
     description: ["&7目標：死亡原因（例如 FALL、LAVA）"]
   craft:
+    amount: "個"
     name: "合成"
     description: ["&7目標：合成出的物品"]
   smelt:
+    amount: "個"
     name: "熔煉"
     description: ["&7目標：從熔爐取出的物品"]
   enchant:
+    amount: "次"
     name: "附魔"
     description: ["&7目標：被附魔的物品", "&7進階：enchantments（例如 sharpness:5）"]
   brew:
+    amount: "瓶"
     name: "釀造"
     description: ["&7目標：potion / splash_potion / lingering_potion", "&7進階：potion-types（例如 strength）"]
   anvil:
+    amount: "次"
     name: "使用鐵砧"
     description: ["&7目標：從鐵砧取出的物品"]
   fish:
+    amount: "個"
     name: "釣魚"
     description: ["&7目標：釣到的物品", "&7進階：item（物品細節）"]
   breed:
+    amount: "次"
     name: "繁殖"
     description: ["&7目標：生物"]
   tame:
+    amount: "隻"
     name: "馴服"
     description: ["&7目標：生物"]
   shear:
+    amount: "次"
     name: "剪毛"
     description: ["&7目標：生物"]
   consume:
+    amount: "次"
     name: "食用"
     description: ["&7目標：食物或藥水", "&7進階：item（物品細節）"]
   trade:
+    amount: "次"
     name: "村民交易"
     description: ["&7目標：換到的物品", "&7進階：item、merchants、professions、min-level、costs"]
   acquire-item:
+    amount: "個"
     name: "取得物品（認領）"
     description: ["&7目標：物品", "&7被認領過的物品給別人也不算", "&7進階：sources、item"]
   level:
+    amount: "級（要達到的經驗等級）"
     name: "經驗等級"
     description: ["&7目標數量：要達到的等級"]
   playtime:
+    amount: "分鐘"
     name: "遊玩時間"
     description: ["&7目標數量：分鐘"]
   login-days:
+    amount: "天"
     name: "登入天數"
     description: ["&7目標數量：天（每天只算一次）"]
   login-streak:
+    amount: "天（連續）"
     name: "連續登入"
     description: ["&7目標數量：連續天數"]
   enter-world:
+    amount: "（填 1）"
     name: "進入世界"
     description: ["&7目標：世界名稱"]
   enter-biome:
+    amount: "（填 1）"
     name: "進入生物群系"
     description: ["&7目標：生物群系（例如 cherry_grove）"]
   reach-region:
+    amount: "（填 1）"
     name: "到達座標範圍"
     description: ["&7進階：world、min、max（x,y,z）"]
   statistic:
+    amount: "（原版統計數值，距離類單位是公分）"
     name: "原版統計"
     description: ["&7進階：statistic（例如 JUMP、WALK_ONE_CM）", "&7有子項目的統計需要 sub"]
   advancement:
+    amount: "個（要完成其中幾個）"
     name: "完成原版成就"
     description: ["&7目標：原版成就 ID（例如 story/mine_diamond）", "&7目標數量：要完成其中幾個"]
   milestone-count:
+    amount: "個自訂成就"
     name: "完成自訂成就數"
     description: ["&7目標數量：完成幾個自訂成就", "&7進階：category（只算某分類）"]
   manual:
+    amount: "（用指令推進）"
     name: "手動（指令）"
     description: ["&7只能用 /cm progress 或 /cm grant 推進", "&7方便 NPC 或其他插件串接"]
+
+# 進階條件（編輯器顯示用）
+option:
+  natural-only:
+    name: "只算自然生成的方塊"
+    description: ["&7開啟後，自己放置的方塊再破壞不算"]
+  exclude-spawner:
+    name: "排除生怪磚／生怪蛋"
+    description: ["&7開啟後，生怪磚與生怪蛋生成的生物不算"]
+  enchantments:
+    name: "需要的附魔"
+    description: ["&7附魔結果必須包含這些附魔", "&7格式：&fsharpness:5, unbreaking"]
+    prompt: "&e請輸入附魔，用逗號分隔（例如 &fsharpness:5, unbreaking&e；冒號後是最低等級）："
+  potion-types:
+    name: "藥水種類"
+    description: ["&7釀出的藥水種類，例如 &fstrength, swiftness"]
+    prompt: "&e請輸入藥水種類，用逗號分隔（例如 &fstrength, long_swiftness&e）："
+  item:
+    name: "物品細節"
+    description: ["&7物品必須符合這個範本（附魔、藥水、自訂名稱）", "&7例如指定「經驗修補」附魔書"]
+  merchants:
+    name: "交易對象"
+    description: ["&7不限／村民／流浪商人"]
+  professions:
+    name: "村民職業"
+    description: ["&7例如 &flibrarian&7（圖書管理員）、&fweaponsmith&7（武器匠）"]
+    prompt: "&e請輸入村民職業，用逗號分隔（例如 &flibrarian, cleric&e）："
+  min-level:
+    name: "村民最低等級"
+    description: ["&71 新手、2 見習、3 老手、4 專家、5 大師"]
+  costs:
+    name: "付出的物品"
+    description: ["&7交易時付出的物品要包含其中一種", "&7例如 &femerald"]
+    prompt: "&e請輸入付出的物品，用逗號分隔（例如 &femerald, wheat&e）："
+  sources:
+    name: "取得來源"
+    description: ["&7只算這些方式取得的物品", "&fPICKUP &7撿起、&fCONTAINER &7從容器拿出", "&fCRAFT &7合成、&fSMELT &7熔煉", "&fFISH &7釣魚、&fTRADE &7交易"]
+    prompt: "&e請輸入來源，用逗號分隔（PICKUP, CONTAINER, CRAFT, SMELT, FISH, TRADE）："
+  world:
+    name: "世界"
+    description: ["&7座標範圍所在的世界"]
+  min:
+    name: "範圍角落 1"
+    description: ["&7範圍的其中一個角落（x,y,z）"]
+  max:
+    name: "範圍角落 2"
+    description: ["&7範圍的另一個角落（x,y,z）", "&7兩個角落之間的方塊範圍都算"]
+  statistic:
+    name: "原版統計項目"
+    description: ["&7例如 &fJUMP&7（跳躍）、&fWALK_ONE_CM&7（步行公分）", "&fMINE_BLOCK&7、&fKILL_ENTITY &7這類需要再設定子項目"]
+    prompt: "&e請輸入統計項目（例如 &fJUMP, WALK_ONE_CM, MINE_BLOCK, USE_ITEM&e）："
+  sub:
+    name: "統計子項目"
+    description: ["&7MINE_BLOCK 填方塊、KILL_ENTITY 填生物", "&7USE_ITEM／CRAFT_ITEM 填物品"]
+    prompt: "&e請輸入子項目（方塊、物品或生物 ID，例如 &fdiamond_ore&e）："
+  category:
+    name: "只算某個分類"
+    description: ["&7只計算這個分類中完成的成就數"]
+    prompt: "&e請輸入分類 ID（輸入 none 代表全部分類）："

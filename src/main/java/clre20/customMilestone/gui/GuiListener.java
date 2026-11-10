@@ -36,17 +36,28 @@ public final class GuiListener implements Listener {
         Inventory top = e.getView().getTopInventory();
         if (!(top.getHolder(false) instanceof MilestoneHolder holder)) return;
         e.setCancelled(true);
-        if (e.getClick() != ClickType.LEFT || e.getClickedInventory() != top) return;
+        if (e.getClick() != ClickType.LEFT || e.getClickedInventory() == null) return;
         if (!(e.getWhoClicked() instanceof Player p)) return;
+        boolean bottom = e.getClickedInventory() != top;
+        // 點下方自己的背包：只交給需要「選取背包物品」的介面（例如獎勵編輯），物品不會被移動
+        org.bukkit.inventory.ItemStack picked = null;
+        if (bottom) {
+            if (!holder.getMenu().acceptsBottomClicks()) return;
+            org.bukkit.inventory.ItemStack cur = e.getCurrentItem();
+            if (cur == null || cur.getType().isAir()) return;
+            picked = cur.clone();
+        }
         long now = System.currentTimeMillis();
         Long last = lastClick.get(p.getUniqueId());
         if (last != null && now - last < CLICK_COOLDOWN_MS) return;
         lastClick.put(p.getUniqueId(), now);
         int slot = e.getRawSlot();
+        org.bukkit.inventory.ItemStack item = picked;
         // 下一個 tick 再執行動作，避免在點擊事件中直接開關介面
         Bukkit.getScheduler().runTask(plugin, () -> {
             if (p.isOnline() && p.getOpenInventory().getTopInventory() == top) {
-                holder.getMenu().click(slot);
+                if (item != null) holder.getMenu().clickBottom(item);
+                else holder.getMenu().click(slot);
             }
         });
     }

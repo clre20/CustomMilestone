@@ -63,14 +63,53 @@ public final class ProgressService {
         List<Milestone> list = plugin.registry().byType(type);
         if (list.isEmpty()) return;
         PlayerData d = plugin.data().get(p.getUniqueId());
-        if (d == null || !canProgress(p)) return;
+        if (d == null) return;
+        boolean dbg = !debug.isEmpty() && debug.contains(p.getUniqueId());
+        // 定時檢查的類型每分鐘都會跑，除錯時只回報有變化的結果，避免洗版
+        boolean verbose = dbg && !type.periodic();
+        String typeName = dbg ? plugin.messages().raw("trigger." + type.messageKey() + ".name") : null;
+        if (!canProgress(p)) {
+            if (verbose) plugin.messages().send(p, "debug.gamemode", "type", typeName);
+            return;
+        }
         for (int i = 0; i < list.size(); i++) {
             Milestone m = list.get(i);
-            if (d.isCompleted(m.id()) || !isUnlocked(d, m)) continue;
+            if (d.isCompleted(m.id())) continue;
+            if (!isUnlocked(d, m)) {
+                if (verbose) plugin.messages().send(p, "debug.locked", "type", typeName, "name", m.name(), "id", m.id());
+                continue;
+            }
             long v = valueFn.applyAsLong(m);
-            if (v == SKIP) continue;
+            if (v == SKIP || (type.mode() == TriggerType.Mode.ADD && v <= 0)) {
+                if (verbose) plugin.messages().send(p, "debug.no-match", "type", typeName, "name", m.name(), "id", m.id());
+                continue;
+            }
+            long before = d.progress(m.id());
             apply(p, d, m, v);
+            if (dbg) {
+                long after = d.isCompleted(m.id()) ? m.target() : d.progress(m.id());
+                if (after != before || verbose) {
+                    plugin.messages().send(p, "debug.progress", "type", typeName, "name", m.name(), "id", m.id(),
+                            "before", String.valueOf(before), "after", String.valueOf(after),
+                            "target", String.valueOf(m.target()));
+                }
+            }
         }
+    }
+
+    // ===== 除錯模式（/cm debug） =====
+
+    private final java.util.Set<java.util.UUID> debug = new java.util.HashSet<>();
+
+    /** 切換除錯模式，回傳切換後是否開啟。 */
+    public boolean toggleDebug(java.util.UUID id) {
+        if (debug.remove(id)) return false;
+        debug.add(id);
+        return true;
+    }
+
+    public void clearDebug(java.util.UUID id) {
+        debug.remove(id);
     }
 
     /** 增加量版本的簡便寫法：符合條件就加 amount。 */

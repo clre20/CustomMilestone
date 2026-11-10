@@ -67,6 +67,15 @@ public abstract class Menu {
         set(slot, item, null);
     }
 
+    /** 是否接受點擊下方玩家背包（預設否）。 */
+    protected boolean acceptsBottomClicks() {
+        return false;
+    }
+
+    /** 左鍵點了下方背包的物品（傳入的是複本）。 */
+    protected void clickBottom(org.bukkit.inventory.ItemStack item) {
+    }
+
     void click(int slot) {
         Consumer<Player> a = actions.get(slot);
         if (a != null) a.accept(viewer);

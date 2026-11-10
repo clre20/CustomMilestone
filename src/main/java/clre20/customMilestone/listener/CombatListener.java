@@ -46,7 +46,10 @@ public final class CombatListener implements Listener {
         boolean fromSpawner = reason == CreatureSpawnEvent.SpawnReason.SPAWNER
                 || reason == CreatureSpawnEvent.SpawnReason.SPAWNER_EGG
                 || reason == CreatureSpawnEvent.SpawnReason.DISPENSE_EGG;
+        // 盔甲座不是生物：目標不限時不算，除非明確列在目標裡
+        boolean armorStand = type == EntityType.ARMOR_STAND;
         plugin.progress().add(killer, TriggerType.KILL_ENTITY, 1,
-                t -> t.matchesEntity(type) && !(fromSpawner && t.excludeSpawner()));
+                t -> t.matchesEntity(type) && !(fromSpawner && t.excludeSpawner())
+                        && !(armorStand && t.rawTargets().isEmpty()));
     }
 }

@@ -42,6 +42,9 @@ permissions:
   custommilestone.admin.reset:
     description: 重置玩家的成就資料
     default: op
+  custommilestone.admin.debug:
+    description: 除錯模式：即時顯示自己觸發的成就進度變化與不計入的原因
+    default: op
   custommilestone.admin.reload:
     description: 重新載入設定與成就
     default: op
@@ -60,5 +63,6 @@ permissions:
       custommilestone.admin.grant: true
       custommilestone.admin.progress: true
       custommilestone.admin.reset: true
+      custommilestone.admin.debug: true
       custommilestone.admin.reload: true
       custommilestone.admin.version: true

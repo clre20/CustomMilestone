@@ -173,7 +173,16 @@ public final class Trigger {
         }
         merchants = lowerSet("merchants");
         professions = lowerSet("professions");
+        for (String k : professions) {
+            if (!registryHas(io.papermc.paper.registry.RegistryKey.VILLAGER_PROFESSION, "minecraft:" + k)) {
+                warn.accept("未知的村民職業：" + k);
+            }
+        }
+        for (String k : merchants) {
+            if (!k.equals("villager") && !k.equals("wandering_trader")) warn.accept("交易對象只能是 villager 或 wandering_trader：" + k);
+        }
         minLevel = intOpt("min-level", 0);
+        if (minLevel < 0 || minLevel > 5) warn.accept("村民等級只能是 1~5：" + minLevel);
         for (String c : strings("costs")) {
             Material m = Material.matchMaterial(c.trim());
             if (m == null) warn.accept("未知的交易付出物品：" + c);
@@ -197,11 +206,17 @@ public final class Trigger {
                 warn.accept("附魔條件格式錯誤：" + e);
             }
         }
+        for (String k : ench.keySet()) {
+            if (!registryHas(io.papermc.paper.registry.RegistryKey.ENCHANTMENT, k)) warn.accept("未知的附魔：" + k);
+        }
         enchantments = Collections.unmodifiableMap(ench);
         Set<String> potions = new HashSet<>();
         for (String p : strings("potion-types")) {
             String k = p.trim().toLowerCase(Locale.ROOT);
             potions.add(k.contains(":") ? k : "minecraft:" + k);
+        }
+        for (String k : potions) {
+            if (!registryHas(io.papermc.paper.registry.RegistryKey.POTION, k)) warn.accept("未知的藥水種類：" + k);
         }
         potionTypes = Set.copyOf(potions);
         Object w = rawOptions.get("world");
@@ -245,6 +260,16 @@ public final class Trigger {
         }
         Object cat = rawOptions.get("category");
         category = cat == null ? null : String.valueOf(cat).toLowerCase(Locale.ROOT);
+    }
+
+    private static <T extends org.bukkit.Keyed> boolean registryHas(io.papermc.paper.registry.RegistryKey<T> reg, String key) {
+        NamespacedKey k = NamespacedKey.fromString(key);
+        if (k == null) return false;
+        try {
+            return io.papermc.paper.registry.RegistryAccess.registryAccess().getRegistry(reg).get(k) != null;
+        } catch (RuntimeException e) {
+            return true; // 無法查詢時不阻擋
+        }
     }
 
     private static EntityType parseEntity(String t) {

@@ -71,6 +71,7 @@ public final class PlayerConnectionListener implements Listener {
     public void onQuit(PlayerQuitEvent e) {
         UUID id = e.getPlayer().getUniqueId();
         plugin.chatInput().cancel(id, false);
+        plugin.progress().clearDebug(id);
         plugin.data().detach(id);
     }
 }

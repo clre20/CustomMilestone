@@ -134,6 +134,9 @@ public final class CraftingListener implements Listener {
         if (!(e.getWhoClicked() instanceof Player p) || !plugin.registry().hasType(TriggerType.ANVIL)) return;
         ItemStack result = e.getCurrentItem();
         if (result == null || result.getType().isAir()) return;
+        // 游標上已有別的物品時，一般點擊拿不走成品（Shift 點擊才會直接進背包）
+        ItemStack cursor = e.getCursor();
+        if (!e.isShiftClick() && cursor != null && !cursor.getType().isAir()) return;
         // 經驗不足時原版不會讓玩家拿走成品
         if (p.getGameMode() != GameMode.CREATIVE && p.getLevel() < view.getRepairCost()) return;
         Material type = result.getType();
