@@ -2,6 +2,9 @@
 
 在 Paper 26.x 以上的伺服器建立自訂成就。自訂成就會註冊成真正的原版成就：達成時右上角跳出原版彈窗、聊天室出現原版格式的廣播，按 `L` 打開的成就畫面裡也有自己的分頁，DiscordSRV 會自動同步到 Discord。玩家用箱子選單查看進度、排行榜與待領取獎勵，管理員可以在遊戲內直接新增與修改成就。
 
+
+> **版本檢查提示**：若伺服器有安裝 [HttpHub](https://github.com/clre20/HttpHub)，本插件自動由 HttpHub 集中處理版本檢查與管理員登入通知，避免各插件自開連線與背景執行緒。
+
 ## 功能特性
 
 - **真正的原版成就**：
@@ -194,6 +197,9 @@ milestones:
 ---
 
 # CustomMilestone (English)
+
+
+> **Update Checker**: When [HttpHub](https://github.com/clre20/HttpHub) is installed, update checks and operator login alerts are handled centrally by HttpHub via virtual threads, preventing redundant background connections.
 
 Create custom advancements on Paper 26.x and later. Custom milestones are registered as real vanilla advancements: the vanilla toast, the vanilla chat announcement, their own tab in the `L` screen, and automatic DiscordSRV sync. Players use chest menus for progress, leaderboards and pending rewards; admins can create and edit milestones in game.
 

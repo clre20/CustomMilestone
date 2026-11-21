@@ -9,7 +9,7 @@ load: POSTWORLD
 
 authors: [ Clre20 ]
 website: https://github.com/clre20/CustomMilestone
-softdepend: [ PlaceholderAPI, DiscordSRV ]
+softdepend: [ PlaceholderAPI, DiscordSRV, HttpHub ]
 
 commands:
   custommilestone:

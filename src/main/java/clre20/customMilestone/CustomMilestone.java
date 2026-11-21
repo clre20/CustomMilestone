@@ -123,7 +123,11 @@ public final class CustomMilestone extends JavaPlugin {
         // 插件重載時已在線上的玩家
         for (Player p : Bukkit.getOnlinePlayers()) attachOnline(p);
 
-        if (config.updateCheckOnStartup()) updates.check(null);
+        if (getServer().getPluginManager().isPluginEnabled("HttpHub") && clre20.httpHub.api.HttpHubAPI.isAvailable()) {
+            clre20.httpHub.api.HttpHubAPI.registerUpdateCheck(this, "clre20/CustomMilestone", getPluginMeta().getVersion(), "custommilestone.admin.version", null);
+        } else if (config.updateCheckOnStartup()) {
+            updates.check(null);
+        }
     }
 
     private void attachOnline(Player p) {
